@@ -1,0 +1,134 @@
+<!doctype html>
+<html>
+<head>
+    <title>Assignment 1</title>
+</head>
+<body>
+    <h1 align="center"> Assignment 1</h1>
+
+    <script src="https://threejs.org/build/three.min.js"></script>
+	<script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://threejs.org/examples/js/loaders/OBJLoader.js"></script>
+	<script  src="https://threejs.org/examples/js/loaders/MTLLoader.js"></script>
+	<script>
+	"use strict";
+	let scene, camera, renderer, cameraControls;
+
+
+	let WIDTH  = window.innerWidth;
+	let HEIGHT = window.innerHeight;
+
+	function init() {
+		scene = new THREE.Scene();
+		initRenderer();
+		initScene();
+		handleResize();
+	}
+
+	function initRenderer() {
+		renderer = new THREE.WebGLRenderer({ antialias: true });
+		renderer.setSize(WIDTH, HEIGHT);
+		document.body.appendChild(renderer.domElement);
+	}
+
+	function initScene() {
+
+		initCamera();
+
+		let material = new
+			THREE.MeshStandardMaterial();
+
+
+		var objLoader = new THREE.OBJLoader(  );
+
+        var mtlLoader = new THREE.MTLLoader( );
+
+        mtlLoader.setPath('./');
+        mtlLoader.load(
+			"Skull.mtl",
+			function (mtls){
+				mtls.preload();
+				objLoader.setMaterials(mtls);
+				objLoader.setPath("./");
+				objLoader.load(
+					"Skull.obj",
+					function ( obj ) {
+						obj.scale.set(1,1,1);
+						scene.add(obj);
+						render();
+					},
+					function ( xhr ) {
+						if ( xhr.lengthComputable ) {
+							var percentComplete = xhr.loaded / xhr.total * 100;
+							console.log( 'model ' + Math.round( percentComplete, 2 ) + '% downloaded' );
+						}
+					},
+					function () {
+					}
+				);
+			}
+		);
+
+
+
+		initLight();
+	}
+
+	function handleResize(){
+		window.addEventListener (
+			"resize",
+			function () {
+				WIDTH = window.innerWidth ;
+				HEIGHT = window.innerHeight;
+				renderer.setSize(WIDTH,HEIGHT);
+				camera.aspect = WIDTH/HEIGHT;
+				camera.updateProjectionMatrix();
+				render();
+			}
+		);
+	}
+
+	function initCamera() {
+		camera = new THREE.PerspectiveCamera(50, WIDTH / HEIGHT, 1, 10);
+		camera.position.set(0, 3.5, 5);
+		camera.lookAt(scene.position);
+		cameraControls = new THREE.OrbitControls (
+			camera, renderer.domElement
+		);
+		cameraControls.addEventListener("change",
+			function(){
+				camera.updateProjectionMatrix();
+				render();
+			}
+		);
+	}
+
+	function initLight(){
+		let keyLight = new THREE.DirectionalLight(
+			0xFFBF80, 1.0);
+		keyLight.position.set(-1, 0.5, 1).normalize();
+
+		let fillLight = new THREE.DirectionalLight(
+			0x8080FF, 0.5);
+		fillLight.position.set(1, 0, 1).normalize();
+
+		let backLight = new THREE.DirectionalLight(
+			0xffffff, 0.5);
+		backLight.position.set(1, -0.5, -1).normalize();
+
+		scene.add(keyLight);
+		scene.add(fillLight);
+		scene.add(backLight);
+
+	}
+
+
+	function render() {
+		renderer.render(scene, camera);
+	}
+
+	init();
+	render();
+	</script>
+</body>
+</html>
